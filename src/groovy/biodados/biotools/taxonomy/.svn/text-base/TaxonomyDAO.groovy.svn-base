@@ -1,0 +1,65 @@
+package biodados.biotools.taxonomy
+
+import groovy.sql.Sql
+import org.apache.log4j.Logger
+
+public class TaxonomyDAO {
+
+
+    def url
+    def user
+    def password
+    def driver
+
+    static Logger logger = Logger.getLogger(TaxonomyDAO.class)
+
+
+    private Sql sql
+
+    def init() {
+        logger.trace "Connecting to Taxonomy Db..."
+        sql = Sql.newInstance(url, user, password, driver)
+        logger.trace "Successfully connected to Taxonomy Db."
+    }
+
+    def findAllTaxonEntries() {
+
+        logger.trace "Retrieving all nodes."
+
+        def taxonMap = [:] as TreeMap
+
+        sql.eachRow("""SELECT nd.tax_id, nd.parent_id, nd.rank, nm.name_txt
+                        FROM tax_nodes nd INNER JOIN tax_names nm ON nd.tax_id = nm.tax_id
+                        WHERE nm.name_class = 'scientific name'""")
+                {
+                    row ->
+                    def entry = new TaxonEntry(taxId: row.tax_id, parentId: row.parent_id,
+                            name: row.name_txt, rank: row.rank)
+                    taxonMap[row.tax_id] = entry
+
+                }
+
+        logger.trace "Taxon map sucessfully created."
+
+        return taxonMap;
+    }
+
+    def buildMergedMap() {
+        logger.trace "Building merged map..."
+
+        def mergedMap = [:]
+
+        sql.eachRow("SELECT old_tax_id, new_tax_id FROM tax_nodes_merged ORDER BY new_tax_id") { row ->
+            if (!mergedMap[row[1]]) {
+                mergedMap[row[1]] = []
+            }
+
+            mergedMap[row[1]] << row[0]
+        }
+
+        return mergedMap
+    }
+
+
+}
+

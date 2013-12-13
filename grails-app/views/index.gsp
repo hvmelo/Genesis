@@ -1,122 +1,91 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta name="layout" content="main"/>
-		<title>Welcome to Grails</title>
-		<style type="text/css" media="screen">
-			#status {
-				background-color: #eee;
-				border: .2em solid #fff;
-				margin: 2em 2em 1em;
-				padding: 1em;
-				width: 12em;
-				float: left;
-				-moz-box-shadow: 0px 0px 1.25em #ccc;
-				-webkit-box-shadow: 0px 0px 1.25em #ccc;
-				box-shadow: 0px 0px 1.25em #ccc;
-				-moz-border-radius: 0.6em;
-				-webkit-border-radius: 0.6em;
-				border-radius: 0.6em;
-			}
+<head>
 
-			.ie6 #status {
-				display: inline; /* float double margin fix http://www.positioniseverything.net/explorer/doubled-margin.html */
-			}
+    <meta name="layout" content="main"/>
+    <title>Genesis - The origin of genes</title>
 
-			#status ul {
-				font-size: 0.9em;
-				list-style-type: none;
-				margin-bottom: 0.6em;
-				padding: 0;
-			}
 
-			#status li {
-				line-height: 1.3;
-			}
+</head>
 
-			#status h1 {
-				text-transform: uppercase;
-				font-size: 1.1em;
-				margin: 0 0 0.3em;
-			}
+<body>
 
-			#page-body {
-				margin: 2em 1em 1.25em 18em;
-			}
 
-			h2 {
-				margin-top: 1em;
-				margin-bottom: 0.3em;
-				font-size: 1em;
-			}
 
-			p {
-				line-height: 1.5;
-				margin: 0.25em 0;
-			}
+<div class="container">
 
-			#controller-list ul {
-				list-style-position: inside;
-			}
+    <div class="row">
+        <div class="box">
+            <div class="col-lg-12">
+                <hr>
+                <h2 class="intro-text text-center">Welcome to <strong>GENESIS</strong></h2>
+                <hr>
+                <p class="text-center text-info">This is the homepage of Biodados' gene origin project. Using a database of enriched Kegg orthologous
+                groups (UEKO), the NCBI Taxonomy tree and LCA (lowest common ancestor) algorithms, we were able to
+                assess the point in time where most of the genes have originated. <br/><br/></p>
+                <p class="text-center">Enter a KO number below to find its origin...</p>
+                <p class="text-center">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-3" ></div>
+                        <div class="col-xs-12 col-sm-8 col-md-6">
+                            <g:form controller="KOOrigin" action="origin">
+                                <div class="form-group">
+                                    <label class="sr-only" for="ko">KO Number <em>(ex: K00343)</em></label>
+                                    <input type="text" class="form-control input-lg" name="ko" id="ko" placeholder="KO Number (ex: K00343)" value="${ko}">
+                                    <g:if test="${flash.message && from == "ko"}">
+                                        <div class="alert alert-danger">${flash.message}</div>
+                                    </g:if>
+                                </div>
+                                <p class="text-center"><button type="submit" class="btn btn-primary btn-lg">Submit</button></p>
+                            </g:form>
+                        </div>
+                        <div class="col-sm-2 col-md-3" /></div>
+                    </div>
+                </p>
+                <p class="text-center">...or find the origin of the genes of a given species.</p>
+                <p class="text-center">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-3" ></div>
+                        <div class="col-xs-12 col-sm-8 col-md-6">
+                            <g:form controller="species">
+                                <div class="form-group">
+                                    <label class="sr-only" for="taxid">Tax Id</label>
+                                    <input type="text" class="form-control input-lg" name="taxid" id="taxid" placeholder="Species tax id (ex: 9606)">
+                                    <g:if test="${flash.message && from == "species"}">
+                                        <div class="alert alert-danger">${flash.message}</div>
+                                    </g:if>
+                                </div>
+                                <p class="text-center"><button type="submit" class="btn btn-primary btn-lg">Submit</button></p>
+                            </g:form>
+                        </div>
+                        <div class="col-sm-2 col-md-3" /></div>
+                    </div>
+                </p>
 
-			#controller-list li {
-				line-height: 1.3;
-				list-style-position: inside;
-				margin: 0.25em 0;
-			}
+            </div>
+        </div>
+    </div>
 
-			@media screen and (max-width: 480px) {
-				#status {
-					display: none;
-				}
+</div><!-- /.container -->
 
-				#page-body {
-					margin: 0 1em 1em;
-				}
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6 text-left"><p>Copyright &copy; Henrique Velloso 2013</p></div>
 
-				#page-body h1 {
-					margin-top: 0;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
-		<div id="status" role="complementary">
-			<h1>Application Status</h1>
-			<ul>
-				<li>App version: <g:meta name="app.version"/></li>
-				<li>Grails version: <g:meta name="app.grails.version"/></li>
-				<li>Groovy version: ${GroovySystem.getVersion()}</li>
-				<li>JVM version: ${System.getProperty('java.version')}</li>
-				<li>Reloading active: ${grails.util.Environment.reloadingAgentEnabled}</li>
-				<li>Controllers: ${grailsApplication.controllerClasses.size()}</li>
-				<li>Domains: ${grailsApplication.domainClasses.size()}</li>
-				<li>Services: ${grailsApplication.serviceClasses.size()}</li>
-				<li>Tag Libraries: ${grailsApplication.tagLibClasses.size()}</li>
-			</ul>
-			<h1>Installed Plugins</h1>
-			<ul>
-				<g:each var="plugin" in="${applicationContext.getBean('pluginManager').allPlugins}">
-					<li>${plugin.name} - ${plugin.version}</li>
-				</g:each>
-			</ul>
-		</div>
-		<div id="page-body" role="main">
-			<h1>Welcome to Grails</h1>
-			<p>Congratulations, you have successfully started your first Grails application! At the moment
-			   this is the default page, feel free to modify it to either redirect to a controller or display whatever
-			   content you may choose. Below is a list of controllers that are currently deployed in this application,
-			   click on each to execute its default action:</p>
+            <div class="col-xs-6 text-right"><p><a href="mailto:hvmelo@gmail.com">hvmelo@gmail.com</a></p></div>
 
-			<div id="controller-list" role="navigation">
-				<h2>Available Controllers:</h2>
-				<ul>
-					<g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
-						<li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>
-					</g:each>
-				</ul>
-			</div>
-		</div>
-	</body>
+        </div>
+    </div>
+</footer>
+
+<!-- JavaScript -->
+<script>
+    // Activates the Carousel
+    $('.carousel').carousel({
+        interval: 5000
+    })
+</script>
+
+</body>
 </html>
