@@ -42,25 +42,7 @@
                         <div class="col-sm-2 col-md-3" /></div>
                     </div>
                 </p>
-                <p class="text-center">...or find the origin of the genes of a given species.</p>
-                <p class="text-center">
-                    <div class="row">
-                        <div class="col-sm-2 col-md-3" ></div>
-                        <div class="col-xs-12 col-sm-8 col-md-6">
-                            <g:form controller="species">
-                                <div class="form-group">
-                                    <label class="sr-only" for="taxid">Tax Id</label>
-                                    <input type="text" class="form-control input-lg" name="taxid" id="taxid" placeholder="Species tax id (ex: 9606)">
-                                    <g:if test="${flash.message && from == "species"}">
-                                        <div class="alert alert-danger">${flash.message}</div>
-                                    </g:if>
-                                </div>
-                                <p class="text-center"><button type="submit" class="btn btn-primary btn-lg">Submit</button></p>
-                            </g:form>
-                        </div>
-                        <div class="col-sm-2 col-md-3" /></div>
-                    </div>
-                </p>
+
 
             </div>
         </div>

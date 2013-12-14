@@ -18,14 +18,16 @@
         <div class="box">
             <div class="col-lg-12">
                 <hr>
-                <h2 class="intro-text text-center">SPECIES<strong>ORIGIN</strong></h2>
+                <h3 class="intro-text text-center">GENE ORIGIN <strong>PER SPECIES</strong></h3>
                 <hr>
-                <p class="text-center">Enter a taxid below to find the origin of a given species.</p>
+                <p class="text-center text-info">Using our algorithm, we can also find the origin of the genes of a given species. Some
+                    genes have been inserted into a species DNA by lateral transfers. In our results, we also try to assess those genes.<br/><br/></p>
+                <p class="text-center">Enter a taxid below to find the origin of the genes of a given species.</p>
                 <p class="text-center">
                     <div class="row">
                         <div class="col-sm-2 col-md-3" ></div>
                         <div class="col-xs-12 col-sm-8 col-md-6">
-                            <g:form controller="speciesOrigin">
+                            <g:form controller="species" action="speciesOrigin">
                                 <div class="form-group">
                                     <label class="sr-only" for="taxid">Tax Id</label>
                                     <input type="text" class="form-control input-lg" name="taxid" id="taxid" placeholder="Species tax id (ex: 9606)">

@@ -47,24 +47,5 @@ class KOOriginController {
 
     }
 
-    def downloadCSV() {
 
-        Map model = params.model;
-
-        model.results.each { line ->
-            println line[1]
-        }
-
-        println(params.results)
-        println(params.ko)
-
-        StringBuffer strBuff = new StringBuffer()
-
-
-
-
-
-
-
-    }
 }

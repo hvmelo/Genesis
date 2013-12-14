@@ -43,7 +43,7 @@
                 <div class="collapse navbar-collapse navbar-ex1-collapse">
                     <ul class="nav navbar-nav">
                         <li><a href="${createLink(uri: '/')}">Gene Origin</a></li>
-                        <li><a href="${createLink(uri: '/species.gsp')}">Species Origin</a></li>
+                        <li><a href="${createLink(controller: 'species', action: 'index')}">Per Species</a></li>
                         <li><a href="about.html">About</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>

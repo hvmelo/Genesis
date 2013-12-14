@@ -14,7 +14,8 @@ class GeneOriginService {
 
     def sessionFactory
 
-    TaxonomyTree taxonomyTree
+    def taxonomyTree
+    def taxonomyDao
 
 
     def lcasFromKO(String ko) {
@@ -34,28 +35,41 @@ class GeneOriginService {
 
     def geneOriginForSpecies(Integer taxid) {
 
-        if (!taxonomyTree) {
-            TaxonomyDAO dao = new TaxonomyDAO()
-            dao.sessionFactory = sessionFactory
-            dao.init()
+        def session = sessionFactory.getCurrentSession()
 
-            taxonomyTree = new TaxonomyTree()
-            taxonomyTree.dao = dao
-            taxonomyTree.mountTaxonomyTree()
+        def sqlStr = """
+            select distinct m.ko, m.ko_desc, m.lca_name, m.lca_txid from multi_lca m inner join
+            ueko u on m.ko = u.ko where u.taxid = ${taxid} and m.lca_order = 1""".toString()
 
-        }
+        Map<Integer, String> lineage = [:]
 
         DefaultMutableTreeNode node =  taxonomyTree.findNodeByTaxId(taxid)
+        String speciesName = node.userObject.name
         DefaultMutableTreeNode rootNode = taxonomyTree.rootNode
 
-        if (node) {
+        Set<Integer> lineageSet = [] as Set
 
+        if (node) {
             while (node != rootNode) {
                 TaxonEntry taxonInfo = node.userObject
-                println taxonInfo.name
+                lineage[taxonInfo.level] = taxonInfo.name
+                lineageSet << taxonInfo.taxId
                 node = node.parent
             }
         }
+
+        List<Object[]> koLcas = session.createSQLQuery(sqlStr).list()
+
+
+        //Pick up lateral transfers
+        List<Object[]> lateralTransfers = koLcas.findAll { Object[] row ->
+            !lineageSet.contains(row[3])
+        }
+
+        koLcas = koLcas.minus(lateralTransfers)
+
+        [speciesName: speciesName, koLcas: koLcas, lateralTransfers: lateralTransfers]
+
 
     }
 }
