@@ -38,7 +38,7 @@ class GeneOriginService {
         def session = sessionFactory.getCurrentSession()
 
         def sqlStr = """
-            select distinct m.ko, m.ko_desc, m.lca_name, m.lca_txid from multi_lca m inner join
+            select distinct m.ko, m.ko_desc, m.lca_name, m.lca_txid, m.lca_level from multi_lca m inner join
             ueko u on m.ko = u.ko where u.taxid = ${taxid} and m.lca_order = 1""".toString()
 
         Map<Integer, String> lineage = [:]
@@ -68,7 +68,20 @@ class GeneOriginService {
 
         koLcas = koLcas.minus(lateralTransfers)
 
-        [speciesName: speciesName, koLcas: koLcas, lateralTransfers: lateralTransfers]
+
+        Map levelKoCount = [:]
+
+        for (int i = 1; i <= lineage.keySet().size(); i++) {
+            levelKoCount[lineage[i]] = 0
+        }
+
+        koLcas.each {row ->
+            Integer level = row[4]
+            String name = lineage[level]
+            levelKoCount[name] = levelKoCount[name] + 1
+        }
+
+        [levelKoCount: levelKoCount, speciesName: speciesName, koLcas: koLcas, lateralTransfers: lateralTransfers]
 
 
     }
