@@ -14,6 +14,7 @@ class KOOriginController {
             return
         }
 
+        //def result = geneOriginService.multipleLCAsFromKO(ko)
         Object[] results = geneOriginService.lcasFromKO(ko)
 
         if (!results) {
@@ -27,7 +28,7 @@ class KOOriginController {
             StringBuffer strBuf = new StringBuffer()
 
             results.each { line ->
-                strBuf << "${line[1]}\t${line[2]}\t${line[4]}\t${line[7]}\n"
+                strBuf << "${line[2]}\t${line[3]}\t${line[5]}\t${line[8]}\n"
             }
 
             println strBuf.toString()
@@ -39,7 +40,7 @@ class KOOriginController {
             return
         }
 
-        def description = new URL("http://rest.kegg.jp/find/ko/${ko}").getText().split("\t")[1]
+        def description = results ? results[0][1] : null
 
 
         [ko: ko, koDescription: description, results: results]

@@ -1,5 +1,7 @@
 package genesis
 
+import biodados.biotools.lca.LCAInfo
+import biodados.biotools.lca.MultipleLCA
 import biodados.biotools.taxonomy.TaxonEntry
 import biodados.biotools.taxonomy.TaxonomyTree
 import biodados.biotools.taxonomy.TaxonomyDAO
@@ -15,7 +17,10 @@ class GeneOriginService {
     def sessionFactory
 
     def taxonomyTree
-    def taxonomyDao
+    def multipleLCA
+    def grailsApplication
+
+    List<Integer> completeGenomeList
 
 
     def lcasFromKO(String ko) {
@@ -24,7 +29,7 @@ class GeneOriginService {
 
         def sqlStr = """
             SELECT *
-            FROM multi_ko_lca
+            FROM multi_lca
             WHERE ko = '${ko}'""".toString()
 
         Object[] results = session.createSQLQuery(sqlStr).list()
@@ -85,4 +90,79 @@ class GeneOriginService {
 
 
     }
+
+    def multipleLCAsFromKO(String ko) {
+
+        def session = sessionFactory.getCurrentSession()
+
+        def sqlStr = """
+            SELECT distinct taxid
+            FROM ueko
+            WHERE ko = '${ko}'""".toString()
+
+        List<Object[]> results = session.createSQLQuery(sqlStr).list()
+
+        List<Integer> positiveTaxids = results.collect{ Object[] row ->
+            (Integer) row[0]
+        }
+
+        findMultipleLCAs(positiveTaxids)
+
+    }
+
+    def getPositiveAndNegativeListsFromKO(String ko) {
+
+        def session = sessionFactory.getCurrentSession()
+
+        def sqlStr = """
+            SELECT distinct taxid
+            FROM ueko
+            WHERE ko = '${ko}'""".toString()
+
+        List<Object[]> results = session.createSQLQuery(sqlStr).list()
+
+        List<Integer> positiveTaxIds = results.collect{ Object[] row ->
+            (Integer) row[0]
+        }
+
+        if (!completeGenomeList)    {
+            InputStream completeGenomeStream = this.class.classLoader.getResourceAsStream(grailsApplication.config.multipleLCA.completeGenomesFileName)
+            completeGenomeList = completeGenomeStream.readLines().collect { String value ->
+                value.toInteger()
+            }
+        }
+
+        List<Integer> negativeTaxIds = completeGenomeList - positiveTaxIds
+
+        [positiveTaxIds: positiveTaxIds, negativeTaxIds: negativeTaxIds]
+
+
+    }
+
+    def findMultipleLCAs(List<Integer> positiveTaxIds) {
+
+        if (!completeGenomeList)    {
+            InputStream completeGenomeStream = this.class.classLoader.getResourceAsStream(grailsApplication.config.multipleLCA.completeGenomesFileName)
+            completeGenomeList = completeGenomeStream.readLines().collect { String value ->
+                value.toInteger()
+            }
+        }
+
+        List<Integer> negativeTaxIds = completeGenomeList - positiveTaxIds
+
+        findMultipleLCAs(positiveTaxIds, negativeTaxIds)
+
+    }
+
+
+    def findMultipleLCAs(List<Integer> positiveTaxIds, List<Integer> negativeTaxIds) {
+
+        List<Integer> excludeTaxIds = grailsApplication.config.multipleLCA.excludeNodes
+        List<Integer> alwaysShowTaxIds = grailsApplication.config.multipleLCA.alwaysShow
+
+        multipleLCA.findMultipleLCAs(positiveTaxIds, negativeTaxIds, excludeTaxIds, alwaysShowTaxIds, false)
+
+    }
+
+
 }

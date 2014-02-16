@@ -1,8 +1,8 @@
 dataSource {
     pooled = true
     driverClassName = "com.mysql.jdbc.Driver"
-    username = "root"
-    password = "admin"
+    username = "genesis"
+    password = "genesis123"
     //dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
 
 }
@@ -19,8 +19,8 @@ environments {
         dataSource {
             dbCreate = "update" // one of 'create', 'create-drop','update'
             url = "jdbc:mysql://localhost:3306/genesis?useUnicode=yes&characterEncoding=UTF-8"
-            username = "root"
-            password = "admin"
+            username = "genesis"
+            password = "genesis123"
         }
         hibernate {
             show_sql = true
@@ -28,14 +28,18 @@ environments {
     }
     test {
         dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
+            dbCreate = "update" // one of 'create', 'create-drop','update'
+            url = "jdbc:mysql://localhost:3306/genesis?useUnicode=yes&characterEncoding=UTF-8"
+            username = "genesis"
+            password = "genesis123"
         }
     }
     production {
         dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
+            dbCreate = "update" // one of 'create', 'create-drop','update'
+            url = "jdbc:mysql://localhost:3306/genesis?useUnicode=yes&characterEncoding=UTF-8"
+            username = "genesis"
+            password = "genesis123"
             properties {
                maxActive = -1
                minEvictableIdleTimeMillis=1800000

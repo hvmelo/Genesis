@@ -1,0 +1,69 @@
+package biodados.biotools.lca
+
+import biodados.biotools.taxonomy.TaxonomyTree
+import biodados.biotools.taxonomy.TaxonEntry
+
+import org.apache.log4j.Logger
+
+/**
+ * Finds the Lowest Common Ancestor from a taxonomy tree.
+ * User: henrique
+ * Date: 15/12/2009
+ * Time: 20:13:06
+ */
+class LCA {
+
+    static Logger logger = Logger.getLogger(LCA.class)
+
+    TaxonomyTree tree
+        
+
+     /**
+      *  Find the lowest common ancestor for a node list.
+      */
+    TaxonEntry lowestCommonAncestor(List taxIdList, List doNotIncludeChildrenOf = null) {
+        logger.debug "Calculating the LCA for taxId list."
+        def nodeMap = tree.findNodeMapByTaxIds(taxIdList)
+
+        if (doNotIncludeChildrenOf != null && doNotIncludeChildrenOf.size() > 0) {
+            logger.debug  "Excluding nodes which are descendants of the not wanted list."
+            def notIncludeMap = tree.findNodeMapByTaxIds(doNotIncludeChildrenOf)
+            def beforeSize = nodeMap.size()
+            nodeMap = nodeMap.findAll {taxid, node ->
+                def ancestor = notIncludeMap.find {parentTaxId, parentNode ->
+                    node.isNodeAncestor(parentNode)
+                }?.value
+                if (ancestor) {
+                    logger.debug "${node.userObject.name} (txid ${taxid}) removed as it is descendant of ${ancestor.userObject.name} (txid ${ancestor.userObject.taxId}). "
+                    return false
+                }
+                return true
+            }
+            def afterSize = nodeMap.size()
+
+            logger.debug "Size before removal: ${beforeSize}. Size after removal: ${afterSize}."
+
+        }
+        
+        // Get a random node to be the first LCA
+        def lca = nodeMap?.find{true}?.getValue()
+        if (lca) {
+            nodeMap.values().each { node ->
+                if (!lca.isNodeDescendant(node)) {
+                    lca = lca.getSharedAncestor(node)
+                }                 
+            }
+            logger.debug "LCA Found. Tax id: $lca.userObject.taxId ($lca.userObject.name)."
+        }
+        else
+        {
+            def error = "LCA cannot be calculated. No valid tax ids were found."
+            logger.error(error)
+            throw new LCAException(error)
+        }
+        return lca?.userObject
+    }
+
+
+
+}

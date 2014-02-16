@@ -175,6 +175,26 @@ public class TaxonomyTree {
         return mapReturn
     }
 
+    List<DefaultMutableTreeNode> findNodesByTaxIds(Collection<Integer> taxIdList) {
+
+        logger.trace "Finding nodes for taxId list."
+
+        List<DefaultMutableTreeNode> returnNodes =  taxIdList.collect { taxId ->
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) mapNodes.get(taxId)
+            if (node == null) {
+                logger.debug "Cannot find a node for taxid ${taxId}."
+
+            }
+            return node
+        }
+
+        returnNodes.removeAll {it == null}
+
+        logger.trace "${returnNodes.size()} node were found out of ${taxIdList.size()} tax ids."
+        return returnNodes
+    }
+
 
 
     def compareTaxons(TaxonEntry entry1, TaxonEntry entry2) {
@@ -264,12 +284,17 @@ public class TaxonomyTree {
 
     }
 
-    def findAllDescendants(def parentNode, Boolean onlyLeaves = true, String returnType = 'entries') {
+    static def findAllDescendants(def parentNode, Boolean onlyLeaves = true, String returnType = 'entries') {
 
         def parentEntry = parentNode.userObject
         logger.debug "Finding all descendants for ${parentEntry?.name} (taxid: ${parentEntry?.taxId})."
 
-        def children = parentNode.preorderEnumeration().findAll {onlyLeaves ? it.isLeaf() : true }
+        def children = parentNode.preorderEnumeration().toList()
+
+        if (onlyLeaves) {
+            children.retainAll{it.isLeaf()}
+
+        }
 
         switch (returnType) {
             case ('entries') :

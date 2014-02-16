@@ -12,6 +12,8 @@
           <root url="file://$MODULE_DIR$/target/work/plugins/resources-1.2.1/web-app" relative="/" />
           <root url="file://$MODULE_DIR$/target/work/plugins/jquery-1.10.2/web-app" relative="/" />
           <root url="file://$MODULE_DIR$/target/work/plugins/database-migration-1.3.8/grails-app/views" relative="/" />
+          <root url="file://$MODULE_DIR$/target/work/plugins/google-visualization-0.6.2/web-app" relative="/" />
+          <root url="file://$MODULE_DIR$/target/work/plugins/google-visualization-0.6.2/grails-app/views" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
@@ -28,6 +30,13 @@
     <content url="file://$MODULE_DIR$/target/work/plugins/database-migration-1.3.8">
       <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/database-migration-1.3.8/src/groovy" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/database-migration-1.3.8/grails-app/controllers" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/target/work/plugins/google-visualization-0.6.2">
+      <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/google-visualization-0.6.2/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/google-visualization-0.6.2/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/target/work/plugins/grails-melody-1.47.2">
+      <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/grails-melody-1.47.2/src/groovy" isTestSource="false" />
     </content>
     <content url="file://$MODULE_DIR$/target/work/plugins/hibernate-3.6.10.3">
       <sourceFolder url="file://$MODULE_DIR$/target/work/plugins/hibernate-3.6.10.3/src/java" isTestSource="false" />
@@ -82,6 +91,9 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/7.0.42/tomcat-embed-jasper-7.0.42.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/tomcat-catalina-ant/7.0.42/tomcat-catalina-ant-7.0.42.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.24/mysql-connector-java-5.1.24.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/jrobin/jrobin/1.5.9/jrobin-1.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/net/bull/javamelody/javamelody-core/1.47.0/javamelody-core-1.47.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/lowagie/itext/2.1.7/itext-2.1.7.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -5,10 +5,15 @@
     <meta name="layout" content="main"/>
     <title>Genesis - The origin of genes</title>
 
+    <g:javascript src="raphael-min.js" />
+    <g:javascript src="jsphylosvg-min.js" />
+
 
 </head>
 
 <body>
+
+
 
 
 
@@ -23,36 +28,43 @@
                 <hr>
 
                 <p class="text-center">
-                        <g:if test="${results}">
-                            <table class="table table-striped" style="background-color: #ffffff">
+                    <g:if test="${results}">
+                        <h5 class="text-left text-info">CANDIDATE GENE ORIGINS</h5>
+                        <table class="table table-striped" style="background-color: #ffffff">
+                            <tr>
+                                <td><strong>#</strong></td>
+                                <td><strong>Origin Txid</strong></td>
+                                <td><strong>Clade of origin</strong></td>
+                                <td><strong>Clade rank</strong></td>
+                                <td><strong>Positive leaves</strong></td>
+                            </tr>
+                            <g:each in="${results}" status="i" var="lca">
                                 <tr>
-                                    <td><strong>#</strong></td>
-                                    <td><strong>Origin Txid</strong></td>
-                                    <td><strong>Clade of origin</strong></td>
-                                    <td><strong>Clade rank</strong></td>
-                                    <td><strong>Positive leaves</strong></td>
+                                    <td>${i+1}</td>
+                                    <td>${lca[2]}</td>
+                                    <td>${lca[3]}</td>
+                                    <td>${lca[5]}</td>
+                                    <td>${lca[8]}</td>
+
                                 </tr>
-                                <g:each in="${results}" status="i" var="lca">
-                                    <tr>
-                                        <td>${i+1}</td>
-                                        <td>${lca[1]}</td>
-                                        <td>${lca[2]}</td>
-                                        <td>${lca[4]}</td>
-                                        <td>${lca[7]}</td>
+                            </g:each>
+                        </table>
+                        <g:form controller="KOOrigin" action="origin">
+                            <input name="ko" type="hidden" value="${ko}">
+                            <input name="export" type="hidden" value="1">
+                            <p class="text-right"><button type="submit" class="btn btn-primary ">
+                                <span class="glyphicon glyphicon-download"></span> Download
+                            </button></p>
+                        </g:form>
+                    </g:if>
 
-                                    </tr>
-                                </g:each>
-                            </table>
-                            <g:form controller="KOOrigin" action="origin">
-                                <input name="ko" type="hidden" value="${ko}">
-                                <input name="export" type="hidden" value="1">
-                                <p class="text-right"><button type="submit" class="btn btn-primary ">
-                                    <span class="glyphicon glyphicon-download"></span> Download
-                                </button></p>
-                            </g:form>
-                        </g:if>
+                </p>
+                <p class="text-center">
+                    <g:if test="${results}">
+                        <div id="svgCanvas"> </div>
+                    </g:if>
 
-                    </p>
+                </p>
             </div>
         </div>
         <div class="box">
@@ -98,12 +110,15 @@
     </div>
 </footer>
 
-<!-- JavaScript -->
-<script>
-    // Activates the Carousel
-    $('.carousel').carousel({
-        interval: 5000
-    })
+<script type="text/javascript">
+    $(document).ready(function(){
+        var dataObject = { newick: '(((Espresso:2,(Milk Foam:2,Espresso Macchiato:5,((Steamed Milk:2,Cappuccino:2,(Whipped Cream:1,Chocolate Syrup:1,Cafe Mocha:3):5):5,Flat White:2):5):5):1,Coffee arabica:0.1,(Columbian:1.5,((Medium Roast:1,Viennese Roast:3,American Roast:5,Instant Coffee:9):2,Heavy Roast:0.1,French Roast:0.2,European Roast:1):5,Brazilian:0.1):1):1,Americano:10,Water:1);' };
+        phylocanvas = new Smits.PhyloCanvas(
+            dataObject,
+            'svgCanvas',
+            800, 800
+        );
+    });
 </script>
 
 </body>

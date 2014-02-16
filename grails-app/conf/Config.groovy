@@ -117,4 +117,16 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     debug  'biodados.biotools.taxonomy'
+    debug  'biodados.biotools.lca'
+
+}
+
+multipleLCA {
+
+    completeGenomesFileName = "completeGenomes.txt"
+
+    //Exclude virus, viruses, unknown and other organisms from LCAs
+    excludeNodes = [12908,12884,10239,28384,29294,48510,2323,48479,42452,61964]
+
+    alwaysShow = [2759,2157,2]
 }
