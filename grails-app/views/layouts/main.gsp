@@ -17,7 +17,13 @@
 		<link rel="apple-touch-icon" sizes="114x114" href="${resource(dir: 'images', file: 'apple-touch-icon-retina.png')}">
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'business-casual.css')}" type="text/css">
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'bootstrap.css')}" type="text/css">
-        <g:javascript library="jquery"/>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'style.css')}" type="text/css">
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'tablet.css')}" type="text/css">
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'mobile.css')}" type="text/css">
+
+
+
+    <g:javascript library="jquery"/>
 
 
     <g:layoutHead/>
@@ -45,7 +51,6 @@
                         <li><a href="${createLink(uri: '/')}">KO Origin</a></li>
                         <li><a href="${createLink(controller: 'species', action: 'index')}">Species Origin</a></li>
                         <li><a href="${createLink(controller: 'multiLCATree', action: 'index')}">MultiLCA Tree</a></li>
-
                         <li><a href="#">About</a></li>
                         <li><a href="#">Contact</a></li>
                     </ul>
@@ -248,8 +253,35 @@
             </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
+        <!-- Modal -->
+        <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width: 500px; padding-top: 250px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Message</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color: green; text-align: left;margin:15px 0 0px">${flash.message}</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
 
         <g:layoutBody/>
+
+        <g:if test="${flash.message}">
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    $('#alertModal').modal({
+                        keyboard: true
+                    });
+                });
+            </script>
+
+        </g:if>
 
 
         <script language="javascript">

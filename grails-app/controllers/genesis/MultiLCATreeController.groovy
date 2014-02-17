@@ -7,9 +7,13 @@ class MultiLCATreeController {
     def index() {
         String taxIdStr = params.taxid
 
-        render(view: "/multiLCATree.gsp")
+        def result = geneOriginService.getPositiveAndNegativeListsFromKO("k00226")
+        def model = [:]
+        if (result) {
+            model = [ko: "k00226", positiveList: result.positiveTaxIds.sort().join("\n"), negativeList: result.negativeTaxIds.sort().join("\n")]
+        }
 
-
+        render(view: "/multiLCATree.gsp", model: model)
 
     }
 
@@ -24,6 +28,34 @@ class MultiLCATreeController {
 
         }
         render(template: "/organismLists", model: model)
+    }
+
+    def multiLCATree () {
+
+        String positiveList = params.positiveList
+        String negativeList = params.negativeList
+
+        if (!positiveList || positiveList.trim() == "") {  C
+            flash.message = "Please provide a list of positive tax ids!"
+            render(view: "/multiLCATree.gsp")
+            return
+        }
+
+        List<Integer> positiveTaxIds = positiveList.split("\n").collect{it.toInteger()}
+
+        List<Integer> negativeTaxIds = []
+
+        if (negativeList && negativeList.trim() != "") {
+            negativeTaxIds = negativeList.split("\n").collect{it.toInteger()}
+        }
+
+        def result = geneOriginService.findMultipleLCAs(positiveTaxIds, negativeTaxIds)
+
+        println result
+
+        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet])
+
+
     }
 
     def speciesOrigin () {
@@ -95,7 +127,7 @@ class MultiLCATreeController {
 
         }
         else {
-            flash.message = "Please enter a valid Tax Id!"
+            flash.message = "Please enter a valid species taxid!"
             render(view: "/species.gsp", model: [:])
 
         }

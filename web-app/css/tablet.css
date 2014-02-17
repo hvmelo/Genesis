@@ -1,0 +1,23 @@
+/* FONT STACK */
+
+@media screen and (max-width: 991px) {
+
+    .navbar-nav {
+        letter-spacing: 0px;
+    }
+
+}
+
+@media screen and (max-width: 767px) {
+
+    .createMultiLCA {
+        height: 70px;
+
+    }
+
+    .navbar-nav {
+        letter-spacing: 3px;
+    }
+
+}
+

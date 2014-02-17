@@ -29,7 +29,7 @@
 
                 <p class="text-center">
                     <g:if test="${results}">
-                        <h5 class="text-left text-info">CANDIDATE GENE ORIGINS</h5>
+                        <h5 class="text-left text-info">CANDIDATE KO ORIGINS</h5>
                         <table class="table table-striped" style="background-color: #ffffff">
                             <tr>
                                 <td><strong>#</strong></td>

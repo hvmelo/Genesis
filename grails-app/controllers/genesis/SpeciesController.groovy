@@ -82,7 +82,7 @@ class SpeciesController {
 
         }
         else {
-            flash.message = "Please enter a valid Tax Id!"
+            flash.message = "Please enter a valid species tax id!"
             render(view: "/species.gsp", model: [:])
 
         }

@@ -11,8 +11,6 @@
 <body>
 
 
-
-
 <div class="container">
 
     <div class="row">
@@ -25,13 +23,13 @@
                 a negative genome list. The positive list must be formed by the NCBI tax ids of organisms which provenly have the gene while
                     the negative list must be formed by NCBI tax ids of organisms which provenly DO NOT have the gene.<br/><br/></p>
                 <p class="text-center">
-                    <g:form controller="species" action="speciesOrigin">
+                    <g:form controller="multiLCATree" action="multiLCATree">
                         <div class="row">
                             <div id="lists">
                                 <g:render template="/organismLists" model="[positiveList: positiveList, negativeList: negativeList]" />
                             </div>
 
-                            <div class="col-sm-4 col-md-6 col-lg-6">
+                            <div class="col-sm-4 col-md-6">
 
                                 <div class="row">
                                     <div class="col-xs-12">
@@ -43,11 +41,16 @@
                                 <div class="row">
 
                                     <div class="col-xs-8 col-md-10" style="padding-right: 5px;">
-                                        <input type="text" class="form-control input-lg"  name="ko" id="ko" placeholder="KO number">
+                                        <input type="text" class="form-control input-lg"  name="ko" id="ko" placeholder="KO number" value="${ko}">
                                     </div>
                                     <div class="col-xs-4 col-md-2" style="padding-left: 5px; padding-right: 5px">
                                         <button onclick="${remoteFunction(controller: 'multiLCATree', action: 'ajaxRenderOrganisms', update: 'lists', params: '\'ko=\' + ko.value')};return false;"
                                                 class="btn btn-primary btn-lg" style="width: 100%" id="btnLoad">Load</button>
+                                    </div>
+                                </div>
+                                <div class="row createMultiLCA">
+                                    <div class="col-xs-12 text-center" style="position: absolute; bottom: 0">
+                                        <button onclick="$('#mountingTreeModal').modal({keyboard: false, backdrop: 'static'});" type="submit" class="btn btn-primary btn-lg">Create MultiLCA Tree</button>
                                     </div>
                                 </div>
                             </div>
@@ -63,6 +66,43 @@
 
 
 </div><!-- /.container -->
+
+
+
+<!-- Modal Mounting Tree -->
+<div class="modal fade" id="mountingTreeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 400px; padding-top: 250px;">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div id="circularG" style="margin-left: 136px;">
+                    <div id="circularG_1" class="circularG">
+                    </div>
+
+                    <div id="circularG_2" class="circularG"> </div>
+
+                    <div id="circularG_3" class="circularG"> </div>
+                    <div id="circularG_4" class="circularG">
+                    </div>
+                    <div id="circularG_5" class="circularG">
+                    </div>
+                    <div id="circularG_6" class="circularG">
+                    </div>
+                    <div id="circularG_7" class="circularG">
+                    </div>
+                    <div id="circularG_8" class="circularG">
+                    </div>
+                </div>
+
+                <p style="text-align: center;margin:15px 0 0px">Please wait, mounting the LCA Tree...</p>
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
 
 <footer>
     <div class="container">

@@ -31,11 +31,8 @@
                                 <div class="form-group">
                                     <label class="sr-only" for="taxid">Tax Id</label>
                                     <input type="text" class="form-control input-lg" name="taxid" id="taxid" placeholder="Species tax id (ex: 9606)">
-                                    <g:if test="${flash.message}">
-                                        <div class="alert alert-danger">${flash.message}</div>
-                                    </g:if>
                                 </div>
-                                <p class="text-center"><button type="submit" class="btn btn-primary btn-lg">Submit</button></p>
+                                <p class="text-center"><button onclick="$('#findOriginModal').modal({keyboard: false, backdrop: 'static'});" type="submit" class="btn btn-primary btn-lg">Submit</button></p>
                             </g:form>
                         </div>
                         <div class="col-sm-2 col-md-3" /></div>
@@ -47,6 +44,40 @@
     </div>
 
 </div><!-- /.container -->
+
+
+!-- Modal Mounting Tree -->
+<div class="modal fade" id="findOriginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 400px; padding-top: 250px;">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div id="circularG" style="margin-left: 136px;">
+                    <div id="circularG_1" class="circularG">
+                    </div>
+
+                    <div id="circularG_2" class="circularG"> </div>
+
+                    <div id="circularG_3" class="circularG"> </div>
+                    <div id="circularG_4" class="circularG">
+                    </div>
+                    <div id="circularG_5" class="circularG">
+                    </div>
+                    <div id="circularG_6" class="circularG">
+                    </div>
+                    <div id="circularG_7" class="circularG">
+                    </div>
+                    <div id="circularG_8" class="circularG">
+                    </div>
+                </div>
+
+                <p style="text-align: center;margin:15px 0 0px">Please wait, finding species origin...</p>
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 <footer>
     <div class="container">
