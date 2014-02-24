@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <p style="text-align: center;margin:15px 0 0px">Please wait, mounting the LCA Tree...</p>
+                <p style="text-align: center;margin:15px 0 0px">Mounting the LCA Tree. Please wait...</p>
             </div>
 
         </div><!-- /.modal-content -->

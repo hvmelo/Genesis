@@ -1,5 +1,9 @@
 package genesis
 
+import biodados.biotools.lca.LCAInfo
+
+import javax.swing.tree.DefaultMutableTreeNode
+
 class MultiLCATreeController {
 
     def geneOriginService
@@ -53,8 +57,53 @@ class MultiLCATreeController {
 
         println result
 
-        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet])
+        DefaultMutableTreeNode treeRoot = result.miniLCATree
 
+        String newick = ""
+
+        if (treeRoot) {
+            newick = "(" + newickFromNode(treeRoot) + "):0.05;"
+        }
+
+        println newick
+
+        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, newick: newick])
+
+
+    }
+
+    String newickFromNode(DefaultMutableTreeNode treeNode) {
+
+        LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
+        String taxonName = lcaInfo.taxonEntry.name
+
+        StringBuffer childStr = new StringBuffer("")
+
+        Enumeration<DefaultMutableTreeNode> children = treeNode.children()
+        if (children) {
+            childStr.append("(")
+
+            boolean first = true
+
+            children.each {DefaultMutableTreeNode childNode ->
+                if (first) {
+                    childStr.append(newickFromNode(childNode))
+                    first = false
+                }
+                else {
+                    childStr.append("," + newickFromNode(childNode))
+                }
+            }
+            childStr.append(")")
+
+        }
+
+        if (treeNode.childCount != 1) {
+            childStr.append(taxonName.replaceAll("[, \\(\\)]","_"))
+        }
+
+
+        return childStr.toString()
 
     }
 
