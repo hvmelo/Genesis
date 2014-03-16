@@ -72,6 +72,12 @@ class MultiLCATreeController {
 
     }
 
+    Map mapFromNode(DefaultMutableTreeNode treeNode) {
+
+
+
+    }
+
     String newickFromNode(DefaultMutableTreeNode treeNode) {
 
         LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
@@ -99,7 +105,7 @@ class MultiLCATreeController {
         }
 
         if (treeNode.childCount != 1) {
-            childStr.append(taxonName.replaceAll("[, \\(\\)]","_"))
+            childStr.append(taxonName.replaceAll("[,'\"\\(\\)]","_"))
         }
 
 
