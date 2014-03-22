@@ -126,7 +126,7 @@
         .append("g")
         .attr("transform", "translate(40,0)");
 
-    d3.json("https://dl.dropboxusercontent.com/u/1661277/flare.json", function(error, json) {
+    d3.json("https://dl.dropboxusercontent.com/u/1661277/tree.json", function(error, json) {
         var nodes = tree.nodes(json),
             links = tree.links(nodes);
 

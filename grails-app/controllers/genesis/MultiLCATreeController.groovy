@@ -1,6 +1,7 @@
 package genesis
 
 import biodados.biotools.lca.LCAInfo
+import grails.converters.JSON
 
 import javax.swing.tree.DefaultMutableTreeNode
 
@@ -59,21 +60,40 @@ class MultiLCATreeController {
 
         DefaultMutableTreeNode treeRoot = result.miniLCATree
 
-        String newick = ""
+        String treeJSON = ""
 
         if (treeRoot) {
-            newick = "(" + newickFromNode(treeRoot) + "):0.05;"
+            JSON json = mapFromNode(treeRoot) as JSON
+            treeJSON = json.toString(true)
         }
 
-        println newick
+        println treeJSON
 
-        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, newick: newick])
+        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, treeJSON: treeJSON])
 
 
     }
 
     Map mapFromNode(DefaultMutableTreeNode treeNode) {
 
+        LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
+        String taxonName = lcaInfo.taxonEntry.name
+
+        Map returnMap = ["name": taxonName]
+
+        Enumeration<DefaultMutableTreeNode> children = treeNode.children()
+
+        if (children) {
+            List childrenList = []
+
+            children.each {DefaultMutableTreeNode childNode ->
+                childrenList << mapFromNode(childNode)
+            }
+
+            returnMap["children"] = childrenList
+
+        }
+        return returnMap;
 
 
     }

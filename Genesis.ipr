@@ -27,8 +27,20 @@
       </profile>
     </annotationProcessing>
   </component>
-  <component name="CopyrightManager" default="">
-    <module2copyright />
+  <component name="CopyrightManager" default="" />
+  <component name="DataSourceManagerImpl" format="xml" hash="4178023281">
+    <data-source source="LOCAL" name="Genesis dev" uuid="64747d3b-0b2e-4dae-95a0-28ebde7ca42b">
+      <driver-ref>mysql</driver-ref>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/genesis?useUnicode=yes&amp;characterEncoding=UTF-8</jdbc-url>
+      <user-name>genesis</user-name>
+      <user-password>dfcddfcfdfc4dfcfdfd9dfc3dfd9df9bdf98df99</user-password>
+      <libraries>
+        <library>
+          <url>file://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.24/mysql-connector-java-5.1.24.jar</url>
+        </library>
+      </libraries>
+    </data-source>
   </component>
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
