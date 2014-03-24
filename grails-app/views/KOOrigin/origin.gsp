@@ -109,13 +109,14 @@
 <script type="text/javascript">
     $(document).ready(function(){
 
+
     });
 
     var width = $(window).width() > 900 ? ($(window).width() > 1300 ? $(window).width() * 0.55 : $(window).width() * 0.7) : $(window).width() * 0.8,
-        height = 500;
+        height = 800;
 
     var tree = d3.layout.tree()
-        .size([height, width - 160]);
+        .size([height, width - 220]);
 
     var diagonal = d3.svg.diagonal()
         .projection(function(d) { return [d.y, d.x]; });
@@ -124,7 +125,7 @@
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(40,0)");
+        .attr("transform", "translate(90,0)");
 
     d3.json("https://dl.dropboxusercontent.com/u/1661277/tree.json", function(error, json) {
         var nodes = tree.nodes(json),
@@ -139,7 +140,7 @@
         var node = svg.selectAll("g.node")
             .data(nodes)
             .enter().append("g")
-            .attr("class", "node")
+            .attr("class", function(d) {return d.size == 9000 ? "positiveNode": "negativeNode"})
             .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
 
         node.append("circle")
@@ -148,11 +149,15 @@
         node.append("text")
             .attr("dx", function(d) { return d.children ? -8 : 8; })
             .attr("dy", 3)
+            .attr("class", function(d) {return d.children ? "notLeaf":"leaf"})
             .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
             .text(function(d) { return d.name; });
+
     });
 
     d3.select(self.frameElement).style("height", height + "px");
+
+
 </script>
 
 </body>

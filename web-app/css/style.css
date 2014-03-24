@@ -4,18 +4,31 @@
     height: 336px;
 }
 
-.node circle {
+.negativeNode circle {
     fill: #fff;
     stroke: steelblue;
     stroke-width: 1.5px;
 }
 
-.node {
-    font: 10px sans-serif;
+
+.positiveNode circle {
+    fill: steelblue;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+
 }
 
 .link {
     fill: none;
     stroke: #ccc;
     stroke-width: 1.5px;
+}
+
+.notLeaf {
+    font: 10px sans-serif;
+}
+
+.leaf {
+    font: 10px sans-serif;
+    font-style: italic;
 }
