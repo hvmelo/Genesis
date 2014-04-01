@@ -122,12 +122,16 @@
         .projection(function(d) { return [d.y, d.x]; });
 
     var svg = d3.select(".treeCanvas").append("svg")
-        .attr("width", width)
+        .attr("width", "100%")
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(90,0)");
+        .attr("transform", "translate(128,0)");
 
-    d3.json("https://dl.dropboxusercontent.com/u/1661277/tree.json", function(error, json) {
+    var jsonString = '{"name":"[LCA] cellular organisms","type":"P","lca":"Y","children":[{"name":"Bacteria","type":"M","lca":"N","children":[{"name":"Mycoplasmataceae","type":"N","lca":"N","children":[{"name":"[LCA] Mycoplasma","type":"M","lca":"Y","children":[{"name":"Mycoplasma iowae 695","type":"P","lca":"N"},{"name":"Mycoplasma penetrans HF-2","type":"P","lca":"N"},{"name":"Mycoplasma gallisepticum","type":"N","lca":"N","children":[{"name":"Mycoplasma gallisepticum str. R(low)","type":"N","lca":"N"}]},{"name":"Mycoplasma mycoides group","type":"N","lca":"N","children":[{"name":"Mycoplasma capricolum subsp. capricolum ATCC 27343","type":"N","lca":"N"}]}]},{"name":"Ureaplasma","type":"N","lca":"N","children":[{"name":"Ureaplasma urealyticum serovar 10 str. ATCC 33699","type":"N","lca":"N"}]}]},{"name":"Proteobacteria","type":"P","lca":"N","children":[{"name":"Azorhizobium caulinodans ORS 571","type":"P","lca":"N"}]},{"name":"Firmicutes","type":"P","lca":"N","children":[{"name":"Planococcus antarcticus DSM 14505","type":"P","lca":"N"}]},{"name":"Chlamydiae/Verrucomicrobia group","type":"M","lca":"N","children":[{"name":"Chlamydia trachomatis","type":"N","lca":"N"}]}]},{"name":"Archaea","type":"M","lca":"N","children":[{"name":"Euryarchaeota","type":"P","lca":"N","children":[{"name":"Methanobacterium formicicum DSM 3637","type":"P","lca":"N"}]},{"name":"Thermoprotei","type":"P","lca":"N","children":[{"name":"Thermoproteus tenax Kra 1","type":"P","lca":"N"}]},{"name":"Nanoarchaeum equitans Kin4-M","type":"N","lca":"N"}]},{"name":"Eukaryota","type":"M","lca":"N","children":[{"name":"Endopterygota","type":"M","lca":"N","children":[{"name":"[LCA] Tribolium castaneum","type":"P","lca":"Y"},{"name":"Drosophila","type":"N","lca":"N","children":[{"name":"Drosophila pseudoobscura pseudoobscura","type":"N","lca":"N"}]},{"name":"Apocrita","type":"N","lca":"N","children":[{"name":"Nasonia vitripennis","type":"N","lca":"N"}]}]},{"name":"Alveolata","type":"P","lca":"N","children":[{"name":"Amphidinium carterae","type":"P","lca":"N"}]},{"name":"Kinetoplastida","type":"P","lca":"N","children":[{"name":"Leishmania amazonensis","type":"P","lca":"N"}]},{"name":"Viridiplantae","type":"M","lca":"N","children":[{"name":"Arabidopsis thaliana","type":"N","lca":"N"}]},{"name":"Cryptophyta","type":"N","lca":"N","children":[{"name":"Cryptomonas paramecium","type":"N","lca":"N"}]}]}]}';
+
+    var json = JSON.parse(jsonString);  // i have parsed my json string to json
+
+    //d3.json("https://dl.dropboxusercontent.com/u/1661277/tree2.json", function(error, json) {
         var nodes = tree.nodes(json),
             links = tree.links(nodes);
 
@@ -140,8 +144,22 @@
         var node = svg.selectAll("g.node")
             .data(nodes)
             .enter().append("g")
-            .attr("class", function(d) {return d.size == 9000 ? "positiveNode": "negativeNode"})
+            .attr("class", function(d) {
+                if (d.type == "P") {
+                    return "positiveNode"
+                } else if (d.type == "N") {
+                    return "negativeNode"
+                }
+                return "mixedNode"
+            })
             .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+        var grad = node.append("defs")
+            .append("linearGradient").attr("id", "grad")
+            .attr("x1", "0%").attr("x2", "100%").attr("y1", "0%").attr("y2", "0%");
+
+        grad.append("stop").attr("offset", "50%").style("stop-color", "steelblue");
+        grad.append("stop").attr("offset", "50%").style("stop-color", "white");
 
         node.append("circle")
             .attr("r", 4.5);
@@ -149,11 +167,19 @@
         node.append("text")
             .attr("dx", function(d) { return d.children ? -8 : 8; })
             .attr("dy", 3)
-            .attr("class", function(d) {return d.children ? "notLeaf":"leaf"})
+            .attr("class", function(d) {
+                if (d.lca == "Y") {
+                    return "lca"
+                }
+                else if (d.children) {
+                    return "notLeaf"
+                }
+                return "leaf"
+            })
             .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
             .text(function(d) { return d.name; });
 
-    });
+    //});
 
     d3.select(self.frameElement).style("height", height + "px");
 

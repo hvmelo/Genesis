@@ -1,5 +1,10 @@
 /* FONT STACK */
 
+svg, .treeCanvas{
+    height: 100%;
+    width: 100%;
+}
+
 .createMultiLCA {
     height: 336px;
 }
@@ -18,6 +23,13 @@
 
 }
 
+.mixedNode circle {
+    fill: url(#grad);
+    stroke: steelblue;
+    stroke-width: 1.5px;
+
+}
+
 .link {
     fill: none;
     stroke: #ccc;
@@ -31,4 +43,9 @@
 .leaf {
     font: 10px sans-serif;
     font-style: italic;
+}
+
+.lca {
+    font: 10px sans-serif;
+    font-weight: bold;
 }

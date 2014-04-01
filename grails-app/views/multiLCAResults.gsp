@@ -56,15 +56,21 @@
                                 <span class="glyphicon glyphicon-download"></span> Download
                             </button></p>
                         </g:form>
+
                     </g:if>
 
                 </p>
-                <p class="text-center">
-                    <g:if test="${lcaSet}">
-                        <div id="treeCanvas"> </div>
-                    </g:if>
+                <g:if test="${lcaSet}">
+                    <hr>
+                    <h4 class="text-center">MULTILCA <strong>TREE</strong></h4>
+                    <hr>
+                    <p class="text-center">
+                        <div class="treeCanvas"> </div>
+                        <p class="text-right"><button type="button" id="save" class="btn btn-primary ">
+                            <span class="glyphicon glyphicon-download"></span> Save SVG
+                        </button></p>
+                </g:if>
 
-                </p>
             </div>
         </div>
         <div class="box">
@@ -166,52 +172,78 @@
 <script type="text/javascript">
     $(document).ready(function(){
 
+        var width = $(window).width() > 900 ? ($(window).width() > 1300 ? $(window).width() * 0.55 : $(window).width() * 0.7) : $(window).width() * 0.8,
+            height = 800;
+
+        var tree = d3.layout.tree()
+            .size([height, width - 220])
+            .separation(function(a, b) { return 2; });
+
+
+        var diagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.y, d.x]; });
+
+        var svg = d3.select(".treeCanvas").append("svg")
+            .attr("width", "100%")
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(128,0)");
+
+        var jsonString = $('<div />').html('${treeJSON}').text();
+
+        var json = JSON.parse(jsonString);  // i have parsed my json string to json
+
+        var nodes = tree.nodes(json),
+            links = tree.links(nodes);
+
+        var link = svg.selectAll("path.link")
+            .data(links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", diagonal);
+
+        var node = svg.selectAll("g.node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", function(d) {
+                if (d.type == "P" || d.type == "PG") {
+                    return "positiveNode"
+                } else if (d.type == "N" || d.type == "NG") {
+                    return "negativeNode"
+                }
+                return "mixedNode"
+            })
+            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+        var grad = node.append("defs")
+            .append("linearGradient").attr("id", "grad")
+            .attr("x1", "0%").attr("x2", "100%").attr("y1", "0%").attr("y2", "0%");
+
+        grad.append("stop").attr("offset", "50%").style("stop-color", "steelblue");
+        grad.append("stop").attr("offset", "50%").style("stop-color", "white");
+
+        node.append("circle")
+            .attr("r", 4.5);
+
+        node.append("text")
+            .attr("dx", function(d) { return d.children ? -8 : 8; })
+            .attr("dy", 3)
+            .attr("class", function(d) {
+                if (d.lca == "Y") {
+                    return "lca"
+                }
+                else if (d.type != "PG" && d.type != "NG") {
+                    return "notLeaf"
+                }
+                return "leaf"
+            })
+            .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
+            .text(function(d) { return d.name; });
+
+        d3.select(self.frameElement).style("height", height + "px");
+
     });
 
-    var width = $(window).width() > 900 ? ($(window).width() > 1300 ? $(window).width() * 0.55 : $(window).width() * 0.7) : $(window).width() * 0.8,
-        height = 500;
-
-    var tree = d3.layout.tree()
-        .size([height, width - 160]);
-
-    var diagonal = d3.svg.diagonal()
-        .projection(function(d) { return [d.y, d.x]; });
-
-    var svg = d3.select(".treeCanvas").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", "translate(40,0)");
-
-    var jsonString = '${treeJSON}';
-
-    var json = JSON.parse(jsonString);  // i have parsed my json string to json
-
-    var nodes = tree.nodes(json),
-        links = tree.links(nodes);
-
-    var link = svg.selectAll("path.link")
-        .data(links)
-        .enter().append("path")
-        .attr("class", "link")
-        .attr("d", diagonal);
-
-    var node = svg.selectAll("g.node")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "node")
-        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-
-    node.append("circle")
-        .attr("r", 4.5);
-
-    node.append("text")
-        .attr("dx", function(d) { return d.children ? -8 : 8; })
-        .attr("dy", 3)
-        .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-        .text(function(d) { return d.name; });
-
-    d3.select(self.frameElement).style("height", height + "px");
 
 </script>
 

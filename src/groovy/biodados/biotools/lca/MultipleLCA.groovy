@@ -421,11 +421,14 @@ class MultipleLCA {
                         LCAInfo proofLCAInfo = new LCAInfo(type: proofNode.userObject.type, taxonEntry: proofTaxonEntry, negativeGenomeCount: proofNode.userObject.negativeGenomeCount,
                             positiveGenomeCount: proofNode.userObject.positiveGenomeCount, unknownGenomeCount: proofNode.userObject.unknownGenomeCount)
                         DefaultMutableTreeNode proofMiniNode = new DefaultMutableTreeNode(proofLCAInfo)
-                        miniLCATreeNode.add(proofMiniNode)
                         if (proofNode.userObject.type != LCAType.POSITIVE_GENOME) {
                             TaxonEntry leafTaxonEntry = info.positiveProofMap.get(proofNode)
                             LCAInfo leafLCAInfo = new LCAInfo(type: LCAType.POSITIVE_GENOME, taxonEntry: leafTaxonEntry, positiveGenomeCount: 1)
-                            proofMiniNode.add(new DefaultMutableTreeNode(leafLCAInfo))
+                            miniLCATreeNode.add(new DefaultMutableTreeNode(leafLCAInfo))
+                        }
+                        else {
+                            miniLCATreeNode.add(proofMiniNode)
+
                         }
                     }
                 }
@@ -458,11 +461,14 @@ class MultipleLCA {
                         LCAInfo proofLCAInfo = new LCAInfo(type: proofNode.userObject.type, taxonEntry: proofTaxonEntry, negativeGenomeCount: proofNode.userObject.negativeGenomeCount,
                                                            positiveGenomeCount: proofNode.userObject.positiveGenomeCount, unknownGenomeCount: proofNode.userObject.unknownGenomeCount)
                         DefaultMutableTreeNode proofMiniNode = new DefaultMutableTreeNode(proofLCAInfo)
-                        miniLCATreeNode.add(proofMiniNode)
                         if (proofNode.userObject.type != LCAType.NEGATIVE_GENOME) {
                             TaxonEntry leafTaxonEntry = info.negativeProofMap.get(proofNode)
                             LCAInfo leafLCAInfo = new LCAInfo(type: LCAType.NEGATIVE_GENOME, taxonEntry: leafTaxonEntry, negativeGenomeCount: 1)
-                            proofMiniNode.add(new DefaultMutableTreeNode(leafLCAInfo))
+                            miniLCATreeNode.add(new DefaultMutableTreeNode(leafLCAInfo))
+                        }
+                        else {
+                            miniLCATreeNode.add(proofMiniNode)
+
                         }
                     }
                 }

@@ -1,7 +1,9 @@
 package genesis
 
 import biodados.biotools.lca.LCAInfo
+import biodados.biotools.lca.LCAType
 import grails.converters.JSON
+import groovy.json.StringEscapeUtils
 
 import javax.swing.tree.DefaultMutableTreeNode
 
@@ -15,7 +17,7 @@ class MultiLCATreeController {
         def result = geneOriginService.getPositiveAndNegativeListsFromKO("k00226")
         def model = [:]
         if (result) {
-            model = [ko: "k00226", positiveList: result.positiveTaxIds.sort().join("\n"), negativeList: result.negativeTaxIds.sort().join("\n")]
+            model = [ko: "k00226", positiveList: result.positiveTaxIds.unique().sort().join("\n"), negativeList: result.negativeTaxIds.unique().sort().join("\n")]
         }
 
         render(view: "/multiLCATree.gsp", model: model)
@@ -28,7 +30,7 @@ class MultiLCATreeController {
         if (ko) {
             def result = geneOriginService.getPositiveAndNegativeListsFromKO(ko)
             if (result) {
-                model = [positiveList: result.positiveTaxIds.sort().join("\n"), negativeList: result.negativeTaxIds.sort().join("\n")]
+                model = [positiveList: result.positiveTaxIds.unique().sort().join("\n"), negativeList: result.negativeTaxIds.unique().sort().join("\n")]
             }
 
         }
@@ -40,7 +42,7 @@ class MultiLCATreeController {
         String positiveList = params.positiveList
         String negativeList = params.negativeList
 
-        if (!positiveList || positiveList.trim() == "") {  C
+        if (!positiveList || positiveList.trim() == "") {
             flash.message = "Please provide a list of positive tax ids!"
             render(view: "/multiLCATree.gsp")
             return
@@ -56,30 +58,48 @@ class MultiLCATreeController {
 
         def result = geneOriginService.findMultipleLCAs(positiveTaxIds, negativeTaxIds)
 
-        println result
-
         DefaultMutableTreeNode treeRoot = result.miniLCATree
 
+        JSON json
         String treeJSON = ""
 
         if (treeRoot) {
-            JSON json = mapFromNode(treeRoot) as JSON
-            treeJSON = json.toString(true)
+            json = mapFromNode(treeRoot, result.lcaSet) as JSON
+            treeJSON = json.toString(false)
         }
 
-        println treeJSON
-
-        render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, treeJSON: treeJSON])
+       render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, treeJSON: treeJSON])
 
 
     }
 
-    Map mapFromNode(DefaultMutableTreeNode treeNode) {
+    Map mapFromNode(DefaultMutableTreeNode treeNode, Set<LCAInfo> lcaSet) {
 
         LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
         String taxonName = lcaInfo.taxonEntry.name
 
-        Map returnMap = ["name": taxonName]
+        String typeStr = ""
+
+        switch (lcaInfo.type) {
+            case LCAType.POSITIVE_GENOME:
+                typeStr = "PG"
+                break
+            case LCAType.POSITIVE:
+                typeStr = "P"
+                break
+            case LCAType.NEGATIVE_GENOME:
+                typeStr = "NG"
+                break
+            case LCAType.NEGATIVE:
+                typeStr = "N"
+                break
+            case LCAType.MIXED:
+                typeStr = "M"
+                break
+
+        }
+
+        Map returnMap = ["name": (lcaSet.contains(lcaInfo) ? "[LCA] " + taxonName : taxonName), "type": typeStr, "lca": (lcaSet.contains(lcaInfo) ? "Y" : "N")]
 
         Enumeration<DefaultMutableTreeNode> children = treeNode.children()
 
@@ -87,7 +107,7 @@ class MultiLCATreeController {
             List childrenList = []
 
             children.each {DefaultMutableTreeNode childNode ->
-                childrenList << mapFromNode(childNode)
+                childrenList << mapFromNode(childNode, lcaSet)
             }
 
             returnMap["children"] = childrenList
@@ -98,40 +118,6 @@ class MultiLCATreeController {
 
     }
 
-    String newickFromNode(DefaultMutableTreeNode treeNode) {
-
-        LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
-        String taxonName = lcaInfo.taxonEntry.name
-
-        StringBuffer childStr = new StringBuffer("")
-
-        Enumeration<DefaultMutableTreeNode> children = treeNode.children()
-        if (children) {
-            childStr.append("(")
-
-            boolean first = true
-
-            children.each {DefaultMutableTreeNode childNode ->
-                if (first) {
-                    childStr.append(newickFromNode(childNode))
-                    first = false
-                }
-                else {
-                    childStr.append("," + newickFromNode(childNode))
-                }
-            }
-            childStr.append(")")
-
-        }
-
-        if (treeNode.childCount != 1) {
-            childStr.append(taxonName.replaceAll("[,'\"\\(\\)]","_"))
-        }
-
-
-        return childStr.toString()
-
-    }
 
     def speciesOrigin () {
 
