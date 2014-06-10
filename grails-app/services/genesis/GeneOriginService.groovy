@@ -132,7 +132,7 @@ class GeneOriginService {
             }
         }
 
-        List<Integer> negativeTaxIds = completeGenomeList - positiveTaxIds
+        List<Integer> negativeTaxIds = positiveTaxIds ? completeGenomeList - positiveTaxIds : []
 
         [positiveTaxIds: positiveTaxIds, negativeTaxIds: negativeTaxIds]
 
@@ -155,12 +155,27 @@ class GeneOriginService {
     }
 
 
-    def findMultipleLCAs(List<Integer> positiveTaxIds, List<Integer> negativeTaxIds) {
+    def findMultipleLCAs(List<Integer> positiveTaxIds, List<Integer> negativeTaxIds, Boolean loadNegatives = false) {
+
+
+        List<Integer> negatives = negativeTaxIds
+
+        if (loadNegatives) {
+            if (!completeGenomeList)    {
+                InputStream completeGenomeStream = this.class.classLoader.getResourceAsStream(grailsApplication.config.multipleLCA.completeGenomesFileName)
+                completeGenomeList = completeGenomeStream.readLines().collect { String value ->
+                    value.toInteger()
+                }
+            }
+
+            negatives += completeGenomeList - positiveTaxIds
+
+        }
 
         List<Integer> excludeTaxIds = grailsApplication.config.multipleLCA.excludeNodes
         List<Integer> alwaysShowTaxIds = grailsApplication.config.multipleLCA.alwaysShow
 
-        multipleLCA.findMultipleLCAs(positiveTaxIds, negativeTaxIds, excludeTaxIds, alwaysShowTaxIds, false)
+        multipleLCA.findMultipleLCAs(positiveTaxIds, negatives, excludeTaxIds, alwaysShowTaxIds, false)
 
     }
 

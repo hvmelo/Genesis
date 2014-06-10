@@ -5,7 +5,7 @@
     <meta name="layout" content="main"/>
     <title>Genesis - The origin of genes</title>
 
-    <g:javascript src="d3.min.js" />
+    <g:javascript src="protovis.min.js" />
 
 </head>
 
@@ -27,7 +27,7 @@
 
                 <p class="text-center">
                     <g:if test="${lcaSet}">
-                        <h5 class="text-left text-info">CANDIDATE KO ORIGINS</h5>
+                        <h5 class="text-left text-info">CANDIDATE GENE ORIGINS (or false positives)</h5>
                         <table class="table table-striped" style="background-color: #ffffff">
                             <tr>
                                 <td><strong>#</strong></td>
@@ -49,9 +49,37 @@
                                 </tr>
                             </g:each>
                         </table>
-                        <g:form controller="KOOrigin" action="origin">
+                        <g:form controller="MultiLCATree" action="exportLCAs">
                             <input name="ko" type="hidden" value="${ko}">
-                            <input name="export" type="hidden" value="1">
+                            <p class="text-right"><button type="submit" class="btn btn-primary ">
+                                <span class="glyphicon glyphicon-download"></span> Download
+                            </button></p>
+                        </g:form>
+
+                    </g:if>
+
+                </p>
+                <p class="text-center">
+                    <g:if test="${geneLosses}">
+                        <h5 class="text-left text-info">CANDIDATE GENE LOSSES (or false negatives)</h5>
+                        <table class="table table-striped" style="background-color: #ffffff">
+                            <tr>
+                                <td><strong>#</strong></td>
+                                <td><strong>Origin Txid</strong></td>
+                                <td><strong>Clade of origin</strong></td>
+                                <td><strong>Clade rank</strong></td>
+                            </tr>
+                            <g:each in="${geneLosses}" status="i" var="info">
+                                <tr>
+                                    <td>${i+1}</td>
+                                    <td>${info.taxonEntry.taxId}</td>
+                                    <td>${info.taxonEntry.name}</td>
+                                    <td>${info.taxonEntry.rank}</td>
+                                </tr>
+                            </g:each>
+                        </table>
+                        <g:form controller="MultiLCATree" action="exportGeneLosses">
+                            <input name="ko" type="hidden" value="${ko}">
                             <p class="text-right"><button type="submit" class="btn btn-primary ">
                                 <span class="glyphicon glyphicon-download"></span> Download
                             </button></p>
@@ -65,10 +93,76 @@
                     <h4 class="text-center">MULTILCA <strong>TREE</strong></h4>
                     <hr>
                     <p class="text-center">
-                        <div class="treeCanvas"> </div>
-                        <p class="text-right"><button type="button" id="save" class="btn btn-primary ">
-                            <span class="glyphicon glyphicon-download"></span> Save SVG
-                        </button></p>
+                    <div style="border : solid 2px #888888; background : #ffffff; color : #ffffff; padding : 4px; width : 100%; overflow-x : scroll; ">
+
+                        <script type="text/javascript+protovis">
+
+                                var rootString = $('<div />').html('${rootString}').text();
+                                var jsonString = $('<div />').html('${treeJSON}').text();
+
+                                var json = JSON.parse(jsonString);  // i have parsed my json string to json
+
+                                var root = pv.dom(json)
+                                    .root(rootString)
+                                    .sort(function(a, b) pv.naturalOrder(a.nodeName, b.nodeName));
+
+                                /* Recursively compute the package sizes. */
+                                root.visitAfter(function(n) {
+                                  if (n.firstChild) {
+                                    n.nodeValue = pv.sum(n.childNodes, function(n) n.nodeValue);
+                                  }
+                                  nodeFont(n);
+                                });
+
+                                var vis = new pv.Panel()
+                                    .width(1000)
+                                    .height(function() (root.nodes().length + 1) * 30)
+                                    .margin(5);
+
+                                var layout = vis.add(pv.Layout.Indent)
+                                    .nodes(function() root.nodes())
+                                    .depth(80)
+                                    .breadth(30);
+
+                                layout.link.add(pv.Line);
+
+                                var node = layout.node.add(pv.Panel)
+                                    .top(function(n) n.y - 6)
+                                    .height(12)
+                                    .right(6)
+                                    .strokeStyle(null)
+                                    .fillStyle(null)
+                                    .events("all");
+
+                                node.anchor("left").add(pv.Dot)
+                                    .strokeStyle("#1f77b4")
+                                    .fillStyle(function(n) n.nodeName.split("@^")[1] == "NG" || n.nodeName.split("@^")[1] == "N"? "#ffffff" : "steelblue")
+                                    .title(function t(d) d.parentNode ? (t(d.parentNode) + "." + d.nodeName) : d.nodeName)
+                                  .anchor("right").add(pv.Label)
+                                    .text(function(n) n.nodeName.split("@^")[0] )
+                                    .font(function(n) nodeFont(n));
+
+                                node.anchor("right").add(pv.Label)
+                                    .textStyle(function(n) n.firstChild || n.toggled ? "#aaa" : "#000")
+                                    .text(function(n) (n.nodeValue >> 10) + "KB");
+
+                                vis.render();
+
+                                /* Toggles the selected node, then updates the layout. */
+                                function toggle(n) {
+                                  n.toggle(pv.event.altKey);
+                                  return layout.reset().root;
+                                }
+
+                                function nodeFont(n) {
+                                    var bold = n.nodeName.split("@^")[2] == "Y" ? "bold " : "";
+                                    var italic = n.nodeName.split("@^")[1] == "NG" || n.nodeName.split("@^")[1] == "PG"  ? "italic " : "";
+                                    return  bold + italic + "12px sans-serif";
+                                }
+
+                                    </script>
+                    </div>
+
                 </g:if>
 
             </div>
@@ -106,6 +200,13 @@
                                     <button onclick="${remoteFunction(controller: 'multiLCATree', action: 'ajaxRenderOrganisms', update: 'lists', params: '\'ko=\' + ko.value')};return false;"
                                             class="btn btn-primary btn-lg" style="width: 100%" id="btnLoad">Load</button>
                                 </div>
+                            </div>
+                            <div class="row">
+                                <div class="checkbox col-xs-12" style="margin-left: 16px;">
+                                    <g:checkBox name="loadNegatives" value="${false}" /> Consider negative all complete genomes not present in the positive list
+
+                                </div>
+
                             </div>
                             <div class="row createMultiLCA">
                                 <div class="col-xs-12 text-center" style="position: absolute; bottom: 0">
@@ -168,85 +269,6 @@
         </div>
     </div>
 </footer>
-
-<script type="text/javascript">
-    $(document).ready(function(){
-
-        var width = $(window).width() > 900 ? ($(window).width() > 1300 ? $(window).width() * 0.55 : $(window).width() * 0.7) : $(window).width() * 0.8,
-            height = 800;
-
-        var tree = d3.layout.tree()
-            .size([height, width - 220])
-            .separation(function(a, b) { return 2; });
-
-
-        var diagonal = d3.svg.diagonal()
-            .projection(function(d) { return [d.y, d.x]; });
-
-        var svg = d3.select(".treeCanvas").append("svg")
-            .attr("width", "100%")
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(128,0)");
-
-        var jsonString = $('<div />').html('${treeJSON}').text();
-
-        var json = JSON.parse(jsonString);  // i have parsed my json string to json
-
-        var nodes = tree.nodes(json),
-            links = tree.links(nodes);
-
-        var link = svg.selectAll("path.link")
-            .data(links)
-            .enter().append("path")
-            .attr("class", "link")
-            .attr("d", diagonal);
-
-        var node = svg.selectAll("g.node")
-            .data(nodes)
-            .enter().append("g")
-            .attr("class", function(d) {
-                if (d.type == "P" || d.type == "PG") {
-                    return "positiveNode"
-                } else if (d.type == "N" || d.type == "NG") {
-                    return "negativeNode"
-                }
-                return "mixedNode"
-            })
-            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-
-        var grad = node.append("defs")
-            .append("linearGradient").attr("id", "grad")
-            .attr("x1", "0%").attr("x2", "100%").attr("y1", "0%").attr("y2", "0%");
-
-        grad.append("stop").attr("offset", "50%").style("stop-color", "steelblue");
-        grad.append("stop").attr("offset", "50%").style("stop-color", "white");
-
-        node.append("circle")
-            .attr("r", 4.5);
-
-        node.append("text")
-            .attr("dx", function(d) { return d.children ? -8 : 8; })
-            .attr("dy", 3)
-            .attr("class", function(d) {
-                if (d.lca == "Y") {
-                    return "lca"
-                }
-                else if (d.type != "PG" && d.type != "NG") {
-                    return "notLeaf"
-                }
-                return "leaf"
-            })
-            .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-            .text(function(d) { return d.name; });
-
-        d3.select(self.frameElement).style("height", height + "px");
-
-    });
-
-
-</script>
-
 
 
 </body>

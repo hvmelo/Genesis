@@ -20,9 +20,9 @@
                 <hr>
                 <h3 class="intro-text text-center">GENE ORIGIN <strong>PER SPECIES</strong></h3>
                 <hr>
-                <p class="text-center text-info">Using our algorithm, we can also find the origin of the genes of a given species. Some
-                    genes have been inserted into a species DNA by lateral transfers. In our results, we also try to assess those genes.<br/><br/></p>
-                <p class="text-center">Enter a taxid below to find the origin of the genes of a given species.</p>
+                <p class="text-center text-info">Using our algorithm, we can also find the origin of all genes of a given species. We then produce graphs
+                and try to find patterns. Some genes have been inserted into a species DNA by lateral transfers. In our results, we also try to assess those genes.<br/><br/></p>
+                <p class="text-center">Enter a taxid below to find the origin of all genes of a given species.</p>
                 <p class="text-center">
                     <div class="row">
                         <div class="col-sm-2 col-md-3" ></div>

@@ -1,12 +1,10 @@
 /* FONT STACK */
 
 svg, .treeCanvas{
-    height: 100%;
-    width: 100%;
 }
 
 .createMultiLCA {
-    height: 336px;
+    height: 300px;
 }
 
 .negativeNode circle {
@@ -48,4 +46,14 @@ svg, .treeCanvas{
 .lca {
     font: 10px sans-serif;
     font-weight: bold;
+}
+
+#center {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#fig {
+    position: relative;
+    margin: auto;
 }

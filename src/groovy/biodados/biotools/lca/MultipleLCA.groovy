@@ -24,6 +24,8 @@ class MultipleLCA {
 
     Set<DefaultMutableTreeNode> nodesOnMiniLCATree
 
+    Set<LCAInfo> geneLosses
+
     MultipleLCA() {
 
         logger.info "Starting Multiple LCA instance..."
@@ -39,11 +41,11 @@ class MultipleLCA {
     }
 
     public Map findMultipleLCAs(List<Integer> positiveTaxIds, List<Integer> negativeTaxIds,
-                                                List<Integer> excludeTaxIds = null, List<Integer> alwaysShowTaxids = null,
-                                                Boolean printTree = false) {
+                                List<Integer> excludeTaxIds = null, List<Integer> alwaysShowTaxids = null,
+                                Boolean printTree = false) {
         logger.info "Finding multiple LCAs for ${positiveTaxIds.size()} taxa..."
 
-
+        geneLosses = [] as Set
 
         logger.info "Mounting the LCA Tree..."
 
@@ -60,7 +62,12 @@ class MultipleLCA {
 
         logger.info "Detected ${lcaSet.size()} LCAs."
 
+        //printLCAMiniTree(lcaTreeRootNode, lcaSet, "")
+
+
         logger.info "Mounting the Mini LCA Tree..."
+
+
 
         DefaultMutableTreeNode miniTreeRoot = new DefaultMutableTreeNode(lcaTreeRootNode.userObject)
         nodesOnMiniLCATree = [miniTreeRoot] as Set
@@ -77,7 +84,7 @@ class MultipleLCA {
             printLCAMiniTree(miniTreeRoot, lcaSet, "")
         }
 
-        return [lcaSet: lcaSet, miniLCATree: miniTreeRoot]
+        return [lcaSet: lcaSet, geneLosses: geneLosses, miniLCATree: miniTreeRoot]
 
     }
 
@@ -125,7 +132,6 @@ class MultipleLCA {
 
 
     private DefaultMutableTreeNode lcaTree (DefaultMutableTreeNode taxonomyTreeNode) {
-
 
 
         if (taxonomyTreeNode in positiveGenomeNodes) {
@@ -239,15 +245,27 @@ class MultipleLCA {
 
 
         LCAInfo lcaInfo = new LCAInfo(taxonEntry: taxonomyTreeNode.userObject, positiveGenomeCount: positiveGenomeCount,
-                                      negativeGenomeCount: negativeGenomeCount, unknownGenomeCount: unknownGenomeCount,
-                                      positiveProofMap: positiveProofMap, negativeProofMap: negativeProofMap,
-                                      positiveGenomeCountMap: positiveGenomeCountMap, negativeGenomeCountMap: negativeGenomeCountMap)
+            negativeGenomeCount: negativeGenomeCount, unknownGenomeCount: unknownGenomeCount,
+            positiveProofMap: positiveProofMap, negativeProofMap: negativeProofMap,
+            positiveGenomeCountMap: positiveGenomeCountMap, negativeGenomeCountMap: negativeGenomeCountMap)
 
         newNode.userObject = lcaInfo
 
         if (positiveChildren > 0 && negativeChildren > 0) {
 
-            lcaInfo.type = LCAType.MIXED
+            if (negativeGenomeCount > 1) {
+                lcaInfo.type = LCAType.MIXED
+
+            }
+            else {
+                lcaInfo.type = LCAType.POSITIVE
+                LCAInfo geneLossInfo = negativeGenomeCountMap.keySet().toList().first().userObject
+                geneLosses << geneLossInfo
+                logger.debug "The gene was probably lost in ${geneLossInfo.taxonEntry.name} (or it is a false negative)."
+                lcaInfo.negativeGenomeCount = 0;
+                lcaInfo.negativeGenomeCountMap = [:]
+
+            }
 
         }
         else if ((positiveChildren > 0 && mixedChildren >0) || positiveChildren > 1 || mixedChildren > 1) {
@@ -270,7 +288,7 @@ class MultipleLCA {
 
     }
 
-    private int findNumberOfPositiveLeafs(int taxid) {
+    public int findNumberOfPositiveLeafs(int taxid) {
 
         DefaultMutableTreeNode node = tree.findNodeByTaxId(taxid)
         if (node) {
@@ -300,11 +318,12 @@ class MultipleLCA {
 
                 lcaSet << info
             }
+        }
 
+        if (parentType == LCAType.NEGATIVE || parentType == LCAType.MIXED) {
             if (type == LCAType.MIXED) {
                 positiveChildWillBeLCA = true
             }
-
         }
 
         Enumeration<DefaultMutableTreeNode> children = node.children()
@@ -315,6 +334,8 @@ class MultipleLCA {
 
         children.each { child ->
 
+            findLCAs(child, type, lcaSet)
+
             LCAInfo childInfo = (LCAInfo) child.userObject
             LCAType childType = childInfo.type
 
@@ -322,31 +343,52 @@ class MultipleLCA {
                 viableChildren << child
             }
 
-            if (childType == LCAType.NEGATIVE) {
+            if (childType == LCAType.NEGATIVE || childType == LCAType.NEGATIVE_GENOME) {
                 negativeChildren << child
             }
 
-            findLCAs(child, type, lcaSet)
 
         }
 
-        if (negativeChildren.size() > 1) {
+        //For a mixed node to be considered LCA it shall hava a minimium number of proof negative leaves.
+        if (negativeChildren.size() > 0) {
 
-            //Only consider for LCA nodes having more than one negative siblings (support)
 
             if (viableChildren.size() == 1) {
                 LCAInfo uniqueChildInfo = (LCAInfo) viableChildren.first().userObject
                 if (uniqueChildInfo.type == LCAType.POSITIVE || uniqueChildInfo.type == LCAType.POSITIVE_GENOME) {
-                    logger.debug "${uniqueChildInfo.taxonEntry.name} is a LCA, since it is the unique positive child node of a mixed parent."
-                    //Should also add the father to compose the tree, even though its is not a LCA
 
-                    lcaSet << uniqueChildInfo
+                    if (info.negativeGenomeCount > 1) {
+                        logger.debug "${uniqueChildInfo.taxonEntry.name} is a LCA, since it is the unique positive child node of a mixed parent."
+                        //Should also add the father to compose the tree, even though its is not a LCA
+
+                        lcaSet << uniqueChildInfo
+
+                        info.type = LCAType.NEGATIVE
+                    }
+                    else {
+                        LCAInfo geneLossInfo = info.negativeGenomeCountMap.keySet().toList().first().userObject
+                        geneLosses << geneLossInfo
+                        logger.debug "The gene was probably lost in ${geneLossInfo.taxonEntry.name} (or it is a false negative)."
+
+                    }
+
+
                 }
             }
             else if (viableChildren.size() > 1) {
-                logger.debug "${info.taxonEntry.name} is a LCA, since it is a mixed node with more than one viable children."
 
-                lcaSet << info
+                if (info.negativeGenomeCount > 1) {
+                    logger.debug "${info.taxonEntry.name} is a LCA, since it is a mixed node with more than one viable children."
+                    lcaSet << info
+                }
+                else {
+                    LCAInfo geneLossInfo = info.negativeGenomeCountMap.keySet().toList().first().userObject
+                    geneLosses << geneLossInfo
+                    logger.debug "The gene was probably lost in ${geneLossInfo.taxonEntry.name} (or it is a false negative)."
+
+                }
+
             }
         }
 
@@ -459,7 +501,7 @@ class MultipleLCA {
                         DefaultMutableTreeNode proofNode = remainingProofs.get(i)
                         TaxonEntry proofTaxonEntry = (TaxonEntry) proofNode.userObject.taxonEntry
                         LCAInfo proofLCAInfo = new LCAInfo(type: proofNode.userObject.type, taxonEntry: proofTaxonEntry, negativeGenomeCount: proofNode.userObject.negativeGenomeCount,
-                                                           positiveGenomeCount: proofNode.userObject.positiveGenomeCount, unknownGenomeCount: proofNode.userObject.unknownGenomeCount)
+                            positiveGenomeCount: proofNode.userObject.positiveGenomeCount, unknownGenomeCount: proofNode.userObject.unknownGenomeCount)
                         DefaultMutableTreeNode proofMiniNode = new DefaultMutableTreeNode(proofLCAInfo)
                         if (proofNode.userObject.type != LCAType.NEGATIVE_GENOME) {
                             TaxonEntry leafTaxonEntry = info.negativeProofMap.get(proofNode)

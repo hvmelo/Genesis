@@ -12,20 +12,21 @@ class MultiLCATreeController {
     def geneOriginService
 
     def index() {
-        String taxIdStr = params.taxid
+//        String taxIdStr = params.taxid
+//
+//        def result = geneOriginService.getPositiveAndNegativeListsFromKO("k00226")
+//        def model = [:]
+//        if (result) {
+//            model = [ko: "k00226", positiveList: result.positiveTaxIds.unique().sort().join("\n"), negativeList: result.negativeTaxIds.unique().sort().join("\n")]
+//        }
 
-        def result = geneOriginService.getPositiveAndNegativeListsFromKO("k00226")
-        def model = [:]
-        if (result) {
-            model = [ko: "k00226", positiveList: result.positiveTaxIds.unique().sort().join("\n"), negativeList: result.negativeTaxIds.unique().sort().join("\n")]
-        }
-
-        render(view: "/multiLCATree.gsp", model: model)
+        render(view: "/multiLCATree.gsp", model: null)
 
     }
 
     def ajaxRenderOrganisms() {
         String ko = params.ko
+        println ko
         def model = [:]
         if (ko) {
             def result = geneOriginService.getPositiveAndNegativeListsFromKO(ko)
@@ -41,6 +42,7 @@ class MultiLCATreeController {
 
         String positiveList = params.positiveList
         String negativeList = params.negativeList
+        Boolean loadNegatives = params.loadNegatives
 
         if (!positiveList || positiveList.trim() == "") {
             flash.message = "Please provide a list of positive tax ids!"
@@ -56,66 +58,155 @@ class MultiLCATreeController {
             negativeTaxIds = negativeList.split("\n").collect{it.toInteger()}
         }
 
-        def result = geneOriginService.findMultipleLCAs(positiveTaxIds, negativeTaxIds)
+
+        def result = geneOriginService.findMultipleLCAs(positiveTaxIds, negativeTaxIds, loadNegatives)
 
         DefaultMutableTreeNode treeRoot = result.miniLCATree
 
         JSON json
         String treeJSON = ""
+        String rootString = ""
 
         if (treeRoot) {
+
+            LCAInfo lcaInfo = (LCAInfo) treeRoot.userObject
+            String taxonName = lcaInfo.taxonEntry.name
+
+            String typeStr = ""
+
+            switch (lcaInfo.type) {
+                case LCAType.POSITIVE_GENOME:
+                    typeStr = "PG"
+                    break
+                case LCAType.POSITIVE:
+                    typeStr = "P"
+                    break
+                case LCAType.NEGATIVE_GENOME:
+                    typeStr = "NG"
+                    break
+                case LCAType.NEGATIVE:
+                    typeStr = "N"
+                    break
+                case LCAType.MIXED:
+                    typeStr = "M"
+                    break
+
+            }
+
+            Boolean lca = result.lcaSet.contains(lcaInfo)
+
+            rootString = "${lca?'[LCA] ':''}$taxonName@^$typeStr@^${lca?'Y':'N'}"
             json = mapFromNode(treeRoot, result.lcaSet) as JSON
             treeJSON = json.toString(false)
         }
 
-       render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet, treeJSON: treeJSON])
+        println result.geneLosses
+
+        session.lcaSet = result.lcaSet
+       session.geneLosses = result.geneLosses
+
+
+       render(view: "/multiLCAResults.gsp", model: [positiveCount: positiveTaxIds.size(), negativeCount: negativeTaxIds.size(), lcaSet: result.lcaSet,
+                                                    geneLosses: result.geneLosses, treeJSON: treeJSON, rootString: rootString])
 
 
     }
 
+
+
     Map mapFromNode(DefaultMutableTreeNode treeNode, Set<LCAInfo> lcaSet) {
 
-        LCAInfo lcaInfo = (LCAInfo) treeNode.userObject
-        String taxonName = lcaInfo.taxonEntry.name
-
-        String typeStr = ""
-
-        switch (lcaInfo.type) {
-            case LCAType.POSITIVE_GENOME:
-                typeStr = "PG"
-                break
-            case LCAType.POSITIVE:
-                typeStr = "P"
-                break
-            case LCAType.NEGATIVE_GENOME:
-                typeStr = "NG"
-                break
-            case LCAType.NEGATIVE:
-                typeStr = "N"
-                break
-            case LCAType.MIXED:
-                typeStr = "M"
-                break
-
-        }
-
-        Map returnMap = ["name": (lcaSet.contains(lcaInfo) ? "[LCA] " + taxonName : taxonName), "type": typeStr, "lca": (lcaSet.contains(lcaInfo) ? "Y" : "N")]
+        Map returnMap = null
 
         Enumeration<DefaultMutableTreeNode> children = treeNode.children()
 
         if (children) {
-            List childrenList = []
+            returnMap = [:]
 
             children.each {DefaultMutableTreeNode childNode ->
-                childrenList << mapFromNode(childNode, lcaSet)
-            }
 
-            returnMap["children"] = childrenList
+                LCAInfo lcaInfo = (LCAInfo) childNode.userObject
+                String taxonName = lcaInfo.taxonEntry.name
+
+                String typeStr = ""
+
+                switch (lcaInfo.type) {
+                    case LCAType.POSITIVE_GENOME:
+                        typeStr = "PG"
+                        break
+                    case LCAType.POSITIVE:
+                        typeStr = "P"
+                        break
+                    case LCAType.NEGATIVE_GENOME:
+                        typeStr = "NG"
+                        break
+                    case LCAType.NEGATIVE:
+                        typeStr = "N"
+                        break
+                    case LCAType.MIXED:
+                        typeStr = "M"
+                        break
+
+                }
+
+                Boolean lca = lcaSet.contains(lcaInfo)
+
+                String keyString = "${lca?'[LCA] ':''}$taxonName@^$typeStr@^${lca?'Y':'N'}"
+
+                returnMap[keyString] = mapFromNode(childNode, lcaSet)
+            }
 
         }
         return returnMap;
 
+    }
 
+    def exportLCAs () {
+        if (session.lcaSet) {
+            StringBuffer strBuf = new StringBuffer()
+            strBuf << "# Number\tTax ID\tScientific Name\tRank\tPositive leaves\tNegative leaves\n"
+
+            int i = 1
+            session.lcaSet.each { LCAInfo lca ->
+                strBuf << "$i\t${lca.taxonEntry.taxId}\t${lca.taxonEntry.name}\t${lca.taxonEntry.rank}\t${lca.positiveGenomeCount}\t${lca.negativeGenomeCount}\n"
+                i++
+            }
+
+            println strBuf.toString()
+
+            response.setHeader "Content-disposition", "attachment; filename=lca_set.tab"
+            response.contentType = 'text/tab-separated-values'
+            response.outputStream << strBuf.toString()
+            response.outputStream.flush()
+            return
+        }
+        else {
+            render(view: "/multiLCATree.gsp", model: null)
+        }
+    }
+
+    def exportGeneLosses () {
+        if (session.geneLosses) {
+            StringBuffer strBuf = new StringBuffer()
+            strBuf << "# Number\tTax ID\tScientific Name\tRank\n"
+
+            int i = 1
+            session.geneLosses.each { LCAInfo info ->
+                strBuf << "$i\t${info.taxonEntry.taxId}\t${info.taxonEntry.name}\t${info.taxonEntry.rank}\n"
+                i++
+            }
+
+            println strBuf.toString()
+
+            response.setHeader "Content-disposition", "attachment; filename=gene_losses.tab"
+            response.contentType = 'text/tab-separated-values'
+            response.outputStream << strBuf.toString()
+            response.outputStream.flush()
+            return
+        }
+        else {
+            render(view: "/multiLCATree.gsp", model: null)
+        }
     }
 
 

@@ -19,9 +19,9 @@
                 <hr>
                 <h3 class="intro-text text-center">MULTILCA <strong>TREE</strong></h3>
                 <hr>
-                <p class="text-center text-info">We can determine the multiple origin of a given gene based on a positive and
-                a negative genome list. The positive list must be formed by the NCBI tax ids of organisms which provenly have the gene while
-                    the negative list must be formed by NCBI tax ids of organisms which provenly DO NOT have the gene.<br/><br/></p>
+                <p class="text-center text-info">We can determine the multiple origins of a given gene based on a positive and
+                a negative list. The positive list must be formed by the NCBI taxonomy ids of the organisms which express the gene while
+                    the ones that DO NOT express the gene.<br/><br/></p>
                 <p class="text-center">
                     <g:form controller="multiLCATree" action="multiLCATree">
                         <div class="row">
@@ -47,6 +47,13 @@
                                         <button onclick="${remoteFunction(controller: 'multiLCATree', action: 'ajaxRenderOrganisms', update: 'lists', params: '\'ko=\' + ko.value')};return false;"
                                                 class="btn btn-primary btn-lg" style="width: 100%" id="btnLoad">Load</button>
                                     </div>
+                                </div>
+                                <div class="row">
+                                    <div class="checkbox col-xs-12" style="margin-left: 16px;">
+                                        <g:checkBox name="loadNegatives" value="${false}" /> Consider negative all complete genomes not present in the positive list
+
+                                    </div>
+
                                 </div>
                                 <div class="row createMultiLCA">
                                     <div class="col-xs-12 text-center" style="position: absolute; bottom: 0">

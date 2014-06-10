@@ -22,7 +22,7 @@
                 <hr>
                 <p class="text-center text-info">This is the homepage of Biodados' gene origin project. Using a database of enriched Kegg orthologous
                 groups (UEKO), the NCBI Taxonomy tree and LCA (lowest common ancestor) algorithms, we were able to
-                assess the point in time where most of the genes have originated. <br/><br/></p>
+                assess the taxonomic clades where most of the genes have originated. We can also detect possible lateral transfers.<br/><br/></p>
                 <p class="text-center">Enter a KO number below to find its origin...</p>
                 <p class="text-center">
                     <div class="row">
